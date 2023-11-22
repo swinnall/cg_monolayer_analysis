@@ -1,0 +1,221 @@
+title=md_cg_analysis
+fname,contrast,lipid,ratio,label
+#
+# EXAMPLE
+# file_name,subphase_lipid,lipid1:lipid2,ratio1:ratio2,label_description
+#
+# --------------------------------------------------------------------------- #
+# 9-13-1054: Interal LNP composition ILL Jun23
+#
+# SET 3. l5:chol (75:25) pH 3 polyA
+#s03-1,d2o_hlipid_dpolya,lipid_5:chol,75:25,h-lipid D<sub>2</sub>O dPolyA
+#s03-2,d2o_dlipid_dpolya,d19_lipid_5:d45_chol,75:25,d-lipid D<sub>2</sub>O dPolyA
+#s03-3,acmw_dlipid_hpolya,d19_lipid_5:d45_chol,75:25,d-lipid ACMW hPolyA
+#s03-4,acmw_hlipid_hpolya,lipid_5:chol,75:25,h-lipid ACMW hPolyA
+#
+# SET 4. l5:chol (75:25) pH 7.4 polyA
+#s04-1,d2o_hlipid_dpolya,lipid_5:chol,75:25,h-lipid D<sub>2</sub>O dPolyA
+#s04-2,d2o_dlipid_dpolya,d19_lipid_5:d45_chol,75:25,d-lipid D<sub>2</sub>O dPolyA
+#s04-3,acmw_dlipid_hpolya,d19_lipid_5:d45_chol,75:25,d-lipid ACMW hPolyA
+#s04-4,acmw_hlipid_hpolya,lipid_5:chol,75:25,h-lipid ACMW hPolyA
+#s09-4,acmw_hlipid_hpolya,lipid_5:chol,75:25,h-lipid ACMW hPolyA
+#
+# SET 5. l5:chol (100:0) pH 3 polyA
+#s05-1,d2o_hlipid_dpolya,lipid_5,100,h-lipid D<sub>2</sub>O dPolyA
+#s05-2,d2o_dlipid_dpolya,d19_lipid_5,100,d-lipid D<sub>2</sub>O dPolyA
+#s05-3,acmw_dlipid_hpolya,d19_lipid_5,100,d-lipid ACMW hPolyA
+#s05-4,acmw_hlipid_hpolya,lipid_5,100,h-lipid ACMW hPolyA
+#
+# SET 6. l5:chol (56.5:43.5) pH 3 polyA
+#s06-1,d2o_hlipid_dpolya,lipid_5:chol,56.5:43.5,h-lipid D<sub>2</sub>O dPolyA
+#s06-2,d2o_dlipid_dpolya,d19_lipid_5:d45_chol,56.5:43.5,d-lipid D<sub>2</sub>O dPolyA
+#s06-3,acmw_dlipid_hpolya,d19_lipid_5:d45_chol,56.5:43.5,d-lipid ACMW hPolyA
+#s06-4,acmw_hlipid_hpolya,lipid_5:chol,56.5:43.5,h-lipid ACMW hPolyA
+#
+# SET 7. l5:chol (100:0) pH 7.4 polyA
+#s07-1,d2o_hlipid_dpolya,lipid_5,100,h-lipid D<sub>2</sub>O dPolyA
+#s07-2,d2o_dlipid_dpolya,d19_lipid_5,100,d-lipid D<sub>2</sub>O dPolyA
+#s07-3,acmw_dlipid_hpolya,d19_lipid_5,100,d-lipid ACMW hPolyA
+#s07-4,acmw_hlipid_hpolya,lipid_5,100,h-lipid ACMW hPolyA
+#s15-4,acmw_hlipid_hpolya,lipid_5,100,h-lipid ACMW hPolyA
+#
+# SET 8. l5:chol (56.5:43.5) pH 7.4 polyA
+#s08-1,d2o_hlipid_dpolya,lipid_5:chol,56.5:43.5,h-lipid D<sub>2</sub>O dPolyA
+#s08-2,d2o_dlipid_dpolya,d19_lipid_5:d45_chol,56.5:43.5,d-lipid D<sub>2</sub>O dPolyA
+#s08-3,acmw_dlipid_hpolya,d19_lipid_5:d45_chol,56.5:43.5,d-lipid ACMW hPolyA
+#s08-4,acmw_hlipid_hpolya,lipid_5:chol,56.5:43.5,h-lipid ACMW hPolyA
+#
+# SET 9. l5:chol (75:25) pH 3 ref
+#s09-1,d2o_hlipid,lipid_5:chol,75:25,h-lipid D<sub>2</sub>O
+#s09-2,d2o_dlipid,d19_lipid_5:d45_chol,75:25,d-lipid D<sub>2</sub>O
+#s09-3,acmw_dlipid,d19_lipid_5:d45_chol,75:25,d-lipid ACMW
+#
+# SET 10. l5:chol (100:0) pH 3 ref
+#s10-1,d2o_hlipid,lipid_5,100,h-lipid D<sub>2</sub>O
+#s10-2,d2o_dlipid,d19_lipid_5,100,d-lipid D<sub>2</sub>O
+#s10-3,acmw_dlipid,d19_lipid_5,100,d-lipid ACMW
+#s12-4,acmw_dlipid,d19_lipid_5,100,d-lipid ACMW
+#
+# SET 11. l5:chol (56.5:43.5) pH 3 ref
+#s11-1,d2o_hlipid_dpolya,lipid_5:chol,56.5:43.5,h-lipid D<sub>2</sub>O
+#s11-2,d2o_dlipid_dpolya,d19_lipid_5:d45_chol,56.5:43.5,d-lipid D<sub>2</sub>O
+#s11-3,acmw_dlipid_hpolya,d19_lipid_5:d45_chol,56.5:43.5,d-lipid ACMW
+#
+# SET 12. l5:chol (75:25) pH 7.4 ref
+#s12-1,d2o_hlipid,lipid_5:chol,75:25,h-lipid D<sub>2</sub>O
+#s12-2,d2o_dlipid,d19_lipid_5:d45_chol,75:25,d-lipid D<sub>2</sub>O
+#s12-3,acmw_dlipid,d19_lipid_5:d45_chol,75:25,d-lipid ACMW
+#
+# SET 13. l5:chol (100:0) pH 7.4 ref
+#s13-1,d2o_hlipid,lipid_5,100,h-lipid D<sub>2</sub>O
+#s13-2,d2o_dlipid,d19_lipid_5,100,d-lipid D<sub>2</sub>O
+#s13-3,acmw_dlipid,d19_lipid_5,100,d-lipid ACMW
+#
+# SET 14. l5:chol (56.5:43.5) pH 7.4 ref
+#s14-1,d2o_hlipid_dpolya,lipid_5:chol,56.5:43.5,h-lipid D<sub>2</sub>O
+#s14-2,d2o_dlipid_dpolya,d19_lipid_5:d45_chol,56.5:43.5,d-lipid D<sub>2</sub>O
+#s14-3,acmw_dlipid_hpolya,d19_lipid_5:d45_chol,56.5:43.5,d-lipid ACMW
+#
+#
+# --------------------------------------------------------------------------- #
+# RB2220338: Interal LNP composition ISIS Feb23
+#
+# 0 % chol pH 3 [samples 07-12]
+#IvsQ_69776_69777,d2o_hlipid,mc3,100,h-lipid D<sub>2</sub>O
+#IvsQ_69778_69779,d2o_dlipid,d62_mc3,100,d-lipid D<sub>2</sub>O
+#IvsQ_69780_69781,acmw_dlipid,d62_mc3,100,d-lipid ACMW
+#
+# 0 % chol pH 3 w/ polyA
+#IvsQ_69786_69787,d2o_hlipid_dPolyA,mc3,100,h-lipid D<sub>2</sub>O
+#IvsQ_69784_69785,d2o_dlipid_dPolyA,d62_mc3,100,d-lipid D<sub>2</sub>O
+#IvsQ_69782_69783,acmw_dlipid_hPolyA,d62_mc3,100,d-lipid ACMW
+#
+# ILL JUNE DATA - mc3 (100) pH 3 polyA
+#s02-4,acmw_hlipid_hpolya,mc3,100,h-lipid ACMW
+#s13-4,acmw_dlipid_hpolya,d62_mc3,100,d-lipid ACMW
+#
+#
+# 25 % chol pH 3 [samples 01-06]
+#IvsQ_69764_69765,d2o_hlipid,mc3:chol,75:25,h-lipid D<sub>2</sub>O
+#IvsQ_69766_69767,d2o_dlipid,d62_mc3:d45_chol,75:25,d-lipid D<sub>2</sub>O
+#IvsQ_69768_69769,acmw_dlipid,d62_mc3:d45_chol,75:25,d-lipid ACMW
+#
+# ILL JUNE DATA - mc3:chol (75:25) pH 3 ref
+#s01-1,d2o_hlipid,mc3:chol,75:25,h-lipid D<sub>2</sub>O
+#s01-2,d2o_dlipid,d62_mc3:d45_chol,75:25,d-lipid D<sub>2</sub>O
+#s01-3,acmw_dlipid,d62_mc3:d45_chol,75:25,d-lipid ACMW
+#
+# 25 % chol pH 3 w/ polyA
+IvsQ_69774_69775,d2o_hlipid_dPolyA,mc3:chol,75:25,h-lipid D<sub>2</sub>O
+IvsQ_69772_69773,d2o_dlipid_dPolyA,d62_mc3:d45_chol,75:25,d-lipid D<sub>2</sub>O
+IvsQ_69770_69771,acmw_dlipid_hPolyA,d62_mc3:d45_chol,75:25,d-lipid ACMW
+#
+# ILL JUNE DATA - mc3:chol (75:25) pH 3 polyA
+#s02-1,d2o_hlipid_dpolya,mc3:chol,75:25,h-lipid D<sub>2</sub>O dPolyA
+#s02-2,d2o_dlipid_dpolya,d62_mc3:d45_chol,75:25,d-lipid D<sub>2</sub>O dPolyA
+#s02-3,acmw_dlipid_hpolya,d62_mc3:d45_chol,75:25,d-lipid ACMW hPolyA
+#s01-4,acmw_hlipid_hpolya,mc3:chol,75:25,h-lipid ACMW hPolyA not-repeat
+#s10-4,acmw_hlipid_hpolya,mc3:chol,75:25,h-lipid ACMW hPolyA
+#
+#
+# 43.5 % chol pH 3 [samples 13-18]
+#IvsQ_69788_69789,d2o_hlipid,mc3:chol,56.5:43.5,h-lipid D<sub>2</sub>O
+#IvsQ_69790_69791,d2o_dlipid,d62_mc3:d45_chol,56.5:43.5,d-lipid D<sub>2</sub>O
+#IvsQ_69792_69793,acmw_dlipid,d62_mc3:d45_chol,56.5:43.5,d-lipid ACMW
+#
+# 43.5 % chol pH 3 w/ polyA
+#IvsQ_69798_69799,d2o_hlipid_dPolyA,mc3:chol,56.5:43.5,h-lipid D<sub>2</sub>O
+#IvsQ_69796_69797,d2o_dlipid_dPolyA,d62_mc3:d45_chol,56.5:43.5,d-lipid D<sub>2</sub>O
+#IvsQ_69794_69795,acmw_dlipid_hPolyA,d62_mc3:d45_chol,56.5:43.5,d-lipid ACMW
+#
+# ILL JUNE DATA - mc3:chol (56.5:43.5) pH 3 polyA
+#s11-4,acmw_hlipid_hpolya,mc3:chol,56.5:43.5,h-lipid ACMW
+#s14-4,acmw_dlipid_hpolya,d62_mc3:d45_chol,56.5:43.5,d-lipid ACMW
+#
+#
+# 0 % chol pH 7 [samples 25-30]
+#IvsQ_69816_69817,d2o_hlipid,mc3,100,h-lipid D<sub>2</sub>O
+#IvsQ_69818_69819,d2o_dlipid,d62_mc3,100,d-lipid D<sub>2</sub>O
+#IvsQ_69820_69821,acmw_dlipid,d62_mc3,100,d-lipid ACMW
+#
+# 0 % chol pH 7 w/ polyA
+#IvsQ_69826_69827,d2o_hlipid_dPolyA,mc3,100,h-lipid D<sub>2</sub>O
+#IvsQ_69824_69825,d2o_dlipid_dPolyA,d62_mc3,100,d-lipid D<sub>2</sub>O
+#IvsQ_69822_69823,acmw_dlipid_hPolyA,d62_mc3,100,d-lipid ACMW
+#s15-1,acmw_hlipid_hpolya,mc3,100,h-lipid ACMW
+#
+#
+# 25 % chol pH 7 [samples 19-24]
+#IvsQ_69804_69805,d2o_hlipid,mc3:chol,75:25,h-lipid D<sub>2</sub>O
+#IvsQ_69806_69807,d2o_dlipid,d62_mc3:d45_chol,75:25,d-lipid D<sub>2</sub>O
+#IvsQ_69808_69809,acmw_dlipid,d62_mc3:d45_chol,75:25,d-lipid ACMW
+#
+# 25 % chol pH 7 w/ polyA
+#IvsQ_69814_69815,d2o_hlipid_dPolyA,mc3:chol,75:25,h-lipid D<sub>2</sub>O
+#IvsQ_69812_69813,d2o_dlipid_dPolyA,d62_mc3:d45_chol,75:25,d-lipid D<sub>2</sub>O
+#IvsQ_69810_69811,acmw_dlipid_hPolyA_2,d62_mc3:d45_chol,75:25,d-lipid ACMW
+#s15-2,acmw_hlipid_hpolya,mc3:chol,75:25,h-lipid ACMW
+#
+#
+# 43 % chol pH 7 [samples 31-36]
+#IvsQ_69828_69829,d2o_hlipid,mc3:chol,56.5:43.5,h-lipid D<sub>2</sub>O
+#IvsQ_69830_69831,d2o_dlipid,d62_mc3:d45_chol,56.5:43.5,d-lipid D<sub>2</sub>O
+#IvsQ_69832_69833,acmw_dlipid,d62_mc3:d45_chol,56.5:43.5,d-lipid ACMW
+#
+# 43 % chol pH 7 w/ polyA
+#IvsQ_69838_69839,d2o_hlipid_dPolyA,mc3:chol,56.5:43.5,h-lipid D<sub>2</sub>O
+#IvsQ_69836_69837,d2o_dlipid_dPolyA,d62_mc3:d45_chol,56.5:43.5,d-lipid D<sub>2</sub>O
+#IvsQ_69834_69835,acmw_dlipid_hPolyA,d62_mc3:d45_chol,56.5:43.5,d-lipid ACMW
+#s15-3,acmw_hlipid_hpolya,mc3:chol,56.5:43.5,h-lipid ACMW hPolyA
+#
+#
+# low Q acmw
+#IvsQ_69840_acmw,acmw_hlipid,mc3,100,ACMW
+#
+# low Q pH 3.0
+#IvsQ_69780_S09,acmw_dlipid_1,d62_mc3,100,0% chol. d-lipid ACMW pH3.00
+#IvsQ_69782_S10,acmw_dlipid_hPolyA_1,d62_mc3,100,0% chol. d-lipid ACMW pH3.00 PolyA
+#IvsQ_69768_S03,acmw_dlipid,d62_mc3:d45_chol,75:25,25% chol. d-lipid ACMW pH3.00
+#IvsQ_69770_S04,acmw_dlipid_hPolyA,d62_mc3:d45_chol,75:25,25% chol. d-lipid ACMW pH3.00 PolyA
+#IvsQ_69792_S15,acmw_dlipid_2,d62_mc3:d45_chol,56.5:43.5,43.5% chol. d-lipid ACMW pH3.00
+#IvsQ_69794_S16,acmw_dlipid_hPolyA2,d62_mc3:d45_chol,56.5:43.5,43.5% chol. d-lipid ACMW pH3.00 PolyA
+#
+# low Q pH 7.4
+#IvsQ_69820_S27,acmw_dlipid_3,d62_mc3,100,0% chol. d-lipid ACMW pH7.40
+#IvsQ_69822_S28,acmw_dlipid_hPolyA_3,d62_mc3,100,0% chol. d-lipid ACMW pH7.40 PolyA
+#IvsQ_69808_S21,acmw_dlipid_4,d62_mc3:d45_chol,75:25,25% chol. d-lipid ACMW pH7.40
+#IvsQ_69810_S22,acmw_dlipid_hPolyA_4,d62_mc3:d45_chol,75:25,25% chol. d-lipid ACMW pH7.40 PolyA
+#IvsQ_69832_S33,acmw_dlipid_5,d62_mc3:d45_chol,56.5:43.5,43.5% chol. d-lipid ACMW pH7.40
+#IvsQ_69834_S34,acmw_dlipid_hPolyA_5,d62_mc3:d45_chol,56.5:43.5,43.5% chol. d-lipid ACMW pH7.40 PolyA
+#
+#
+#
+#
+# --------------------------------------------------------------------------- #
+# 9-13-1016: ILL MC3-PolyA injection study
+#
+# reference mc3 PBS:
+#hmc3-D2O,d2O_hlipid,mc3,100,0% chol. h-lipid D2O pD7.85
+#dmc3-D2O,d2O_dlipid,d62_mc3,100,0% chol. d-lipid D2O pD7.85
+#dmc3-ACMW,acmw_dlipid,d62_mc3,100,0% chol. d-lipid ACMW pH7.40
+#
+# mc3 PBS polyA:
+#hmc3-D2O-polyA-PBS,d2o_hlipid_dPolyA,mc3,100,0% chol. h-lipid D2O pD7.85 PolyA
+#dmc3-D2O-polyA-PBS,d2o_dlipid_dPolyA,d62_mc3,100,0% chol. d-lipid D2O pD7.85 PolyA
+#dmc3-ACMW-polyA-PBS,acmw_dlipid_hPolyA,d62_mc3,100,0% chol. d-lipid ACMW pH7.40 PolyA
+#hmc3-ACMW-polyA-PBS,acmw_hlipid_hPolyA,mc3,100,0% chol. h-lipid ACMW pH7.40 PolyA
+#
+# mc3-Chol PBS polyA:
+#hmc3-chol-D2O-polyA-PBS,d2o_hlipid_dPolyA,mc3:chol,75:25,25% chol. h-lipid D2O pD7.85 PolyA
+#dmc3-chol-D2O-polyA-PBS,d2o_dlipid_dPolyA,d62_mc3:d45_chol,75:25,25% chol. d-lipid D2O pD7.85 PolyA
+#dmc3-chol-ACMW-polyA-PBS,acmw_dlipid_hPolyA,d62_mc3:d45_chol,75:25,25% chol. d-lipid ACMW pH7.40 PolyA
+#hmc3-chol-ACMW-polyA-PBS,acmw_hlipid_hPolyA,mc3:chol,75:25,25% chol. h-lipid ACMW pH7.40 PolyA
+#
+# mc3 Citrate polyA:
+#hmc3-D2O-polyA-Citrate,d2o_hlipid_dPolyA,mc3,100,0% chol. h-lipid D2O pD3.45 PolyA
+#dmc3-D2O-polyA-Citrate,d2o_dlipid_dPolyA,d62_mc3,100,0% chol. d-lipid D2O pD3.45 PolyA
+#dmc3-ACMW-polyA-Citrate,acmw_dlipid_hPolyA,d62_mc3,100,0% chol. d-lipid ACMW pH3.00 PolyA
+#hmc3-ACMW-polyA-Citrate,acmw_hlipid_hPolyA,mc3,100,0% chol. h-lipid ACMW pH3.00 PolyA
+#
+#
+#
