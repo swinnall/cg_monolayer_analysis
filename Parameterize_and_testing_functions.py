@@ -318,10 +318,10 @@ def prepare_setup_BL(itp_loc, mdp_loc, lipids='POPC DPPC DIPC DPSM CHOL DBPC DOP
     
     '''Prepare setup of Bilayer system. Give itp_loc, mdp_loc and a list of the lipids in the system'''
     ###fix topology
-    itpDir = "/projects/cp/user/kmzh811/PYTHON/Monolayers/Martini_ITPs"
-    IL_itp = '/projects/cp/user/kmzh811/PYTHON/M3-Ionizable-Lipids/Collection_of_itps/MC3_KC2_DP_DT_LI5.itp'
-    Sterols = "/projects/cp/user/kmzh811/PYTHON/M3-Sterol-Parameters/martini_v3.0_sterols_v1.0.itp"    
-    ffbonded = "/projects/cp/user/kmzh811/PYTHON/M3-Ionizable-Lipids/Collection_of_itps/martini_v3.0_ffbonded.itp"
+    itpDir = "/projects/cp/user/user/PYTHON/Monolayers/Martini_ITPs"
+    IL_itp = '/projects/cp/user/user/PYTHON/M3-Ionizable-Lipids/Collection_of_itps/MC3_KC2_DP_DT_LI5.itp'
+    Sterols = "/projects/cp/user/user/PYTHON/M3-Sterol-Parameters/martini_v3.0_sterols_v1.0.itp"    
+    ffbonded = "/projects/cp/user/user/PYTHON/M3-Ionizable-Lipids/Collection_of_itps/martini_v3.0_ffbonded.itp"
 
     with open('topol.top') as topinput:
         top = topinput.readlines()
@@ -560,7 +560,7 @@ def prepare_setup_BL_stability_neutral(itp_loc, mdp_loc, lipids='POPC DPPC DIPC 
 
 
 
-def run_BL_hexagonal (GRO,TOP, mdp_loc='/projects/cp/user/kmzh811/PYTHON/ILs/HEXAGONAL/MDPs', maxwarn=1, lipids='POPC DPPC DIPC DPSM CHOL DBPC DOPC'):
+def run_BL_hexagonal (GRO,TOP, mdp_loc='/projects/cp/user/user/PYTHON/ILs/HEXAGONAL/MDPs', maxwarn=1, lipids='POPC DPPC DIPC DPSM CHOL DBPC DOPC'):
     '''Runs systems for testing inverted hexagonal phase. By default it uses the mdp files
        located here: /data1/lisbeth/Params/BILAYERS/MDPs/HEXAGONAL.'''
 
