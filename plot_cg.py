@@ -3,7 +3,9 @@ Inspiration from:
 https://levelup.gitconnected.com/python-classes-to-standardize-plotly-figure-formatting-123fe35c8d2d
 """
 
+import sys
 import numpy as np
+import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
@@ -63,9 +65,9 @@ class GenPlot:
                                 )
 
         # color dictionary for violin plots
-        self.color_dict_violin = dict(MC3_ph7 = '#116C6E',
-                                      MC3H_ph3 = '#8F011B',
-                                      MC3H_10p = '#4A8515',
+        self.colors_violin = dict(MC3 = '#116C6E',
+                                      MC3H = '#8F011B',
+                                      # MC3H_10p = '#4A8515',
                                       CHOL = '#e28743',
                                       )
 
@@ -85,8 +87,6 @@ class GenPlot:
 
         # symbol for the experimental data points
         self.marker_symbol =  ['circle', 'square', 'triangle-up', 'diamond', 'circle-open']
-
-
 
         # color dictionary for loglog plot types
         self.color_dict_loglog = dict(DLMC3 = '#32BE25', # dark green for mc3h
@@ -133,7 +133,7 @@ class GenPlot:
                               tickwidth=5,
                               tickcolor='black',
                               tickfont=self.tick_dict,
-                              nticks=3,
+                              # nticks=5,
                               type=axisType,
                               exponentformat='power',
                               title_standoff=40,
@@ -145,23 +145,23 @@ class GenPlot:
     def update_yaxis(self,ylabel='',showticklabels=True,axisType='linear',row=1,col=1):
 
         self.fig.update_yaxes(title_text='<b>'+ylabel+'</b>',
-                          # range=[-20,200],
-                          showline= True,
-                          linecolor= 'black',
-                          linewidth=5,
-                          showticklabels=showticklabels,
-                          ticks= 'inside',
-                          mirror='allticks',
-                          tickwidth=5,
-                          tickcolor='black',
-                          tickfont=self.tick_dict,
-                          nticks=3,
-                          type=axisType,
-                          exponentformat='power',
-                          title_standoff=40,
-                          row=row,
-                          col=col
-                          )
+                              range=[0,30], # apm=[0,150]; thick=[0,30]
+                              showline= True,
+                              linecolor= 'black',
+                              linewidth=5,
+                              showticklabels=showticklabels,
+                              ticks= 'inside',
+                              mirror='allticks',
+                              tickwidth=5,
+                              tickcolor='black',
+                              tickfont=self.tick_dict,
+                              # nticks=10,
+                              type=axisType,
+                              exponentformat='power',
+                              title_standoff=40,
+                              row=row,
+                              col=col
+                              )
 
 
     def update_layout(self,axis_template,showlegend=False):
@@ -170,7 +170,8 @@ class GenPlot:
             xaxis = axis_template,
             yaxis = axis_template,
             showlegend = False,
-            width = 700, height = 700,
+            width = 700,
+            height = 700,
             autosize = False
             )
 
@@ -182,85 +183,46 @@ class GenPlot:
 
 
 
-    def plotViolin_halves(self,df,sysComp,cholPerc,row=1,col=1,showlegend=False):
+    def plotViolin(self,df,lipids,cholName,row=1,col=1,showlegend=False):
 
-        # identify which pH the system is in to access correct mc3 colour
-        if 'MC3' in sysComp and '10P' not in sysComp: suffix = '_ph7'
-        if 'MC3H' in sysComp and '10P' not in sysComp: suffix = '_ph3'
-        if 'MC3H' in sysComp and '10P' in sysComp: suffix = '_10p'
+        # I don't want to do this but need a quick fix.
+        # re-populating lipids with all possible components
+        # to plot empty dataset so they're all the same width
+        lipids = ['MC3H','MC3','CHOL']
 
-        # update cationic ionisable lipid identifier
-        cil_str = sysComp[0]
+        for lipid in lipids:
 
-        # if more than one column, plot mc3 and then cholesterol data
-        if len(df.columns) > 1:
-
-            self.fig.add_trace(go.Violin(
-                                    y=df.loc[:,cil_str],
-                                    side='negative',
-                                    line_color=self.color_dict_violin.get(cil_str+suffix),
-                                    showlegend=showlegend,
-                                    legendgroup=cil_str, scalegroup=cil_str, name=cholPerc,
-                                    ),
-                                    row=row,
-                                    col=col,
-                                    )
+            # if dataset doesn't exist, an column with out of range values is created
+            try: _ = df.loc[:,lipid]
+            except KeyError: df[lipid] = -1 #np.nan
 
             self.fig.add_trace(go.Violin(
-                                    y=df.loc[:,'CHOL'],
-                                    side='positive',
-                                    line_color=self.color_dict_violin.get('CHOL'),
+                                    y=df.loc[:,lipid],
+                                    line_color='black',
+                                    fillcolor=self.colors_violin.get(lipid),
                                     showlegend=showlegend,
-                                    legendgroup='CHOL', scalegroup='CHOL', name=cholPerc,
+                                    legendgroup=lipid,
+                                    scalegroup=lipid,
+                                    name=lipid,
+                                    opacity=0.6,
                                     ),
-                                    row=row,
-                                    col=col,
-                                    )
-
-        # else no cholesterol, plot mc3 data only
-        else:
-            self.fig.add_trace(go.Violin(
-                                    y=df.loc[:,cil_str],
-                                    side='negative',
-                                    line_color=self.color_dict_violin.get(cil_str+suffix),
-                                    showlegend=showlegend,
-                                    legendgroup=cil_str, scalegroup=cil_str, name=cholPerc,
-                                    ),
-                                    row=row,
-                                    col=col,
-                                    )
-
-
-        self.fig.update_xaxes(type='category')
-        self.fig.update_traces(box_visible=True, meanline_visible=True)
-        self.fig.update_layout(violinmode='overlay')
-        self.fig.update_layout(yaxis_nticks=5)
-
-
-
-
-    def plotViolin_full(self,df,sysComp,cholPerc,row=1,col=1,showlegend=False):
-
-        # identify which pH the system is in to access correct mc3 colour
-        suffix = '_ph3' if 'MC3H' in sysComp else '_ph7'
-
-        self.fig.add_trace(go.Violin(
-                                y=df.loc[:,'delta_av'],
-                                line_color=self.color_dict_violin.get('DLMC3'+suffix),
-                                showlegend=showlegend,
-                                legendgroup='DLMC3', scalegroup='DLMC3', name=cholPerc,
-                                ),
                                 row=row,
                                 col=col,
                                 )
 
-        self.fig.update_xaxes(type='category')
-        self.fig.update_traces(box_visible=True, meanline_visible=True)
+        self.fig.update_layout(violinmode='overlay') # overlay / group
+        self.fig.update_traces(box_visible=True,
+                               meanline_visible=True)
+
+        self.fig.update_xaxes(type='category',
+                              title_text=cholName)
+        # self.fig.update_yaxes(nticks=8)
 
 
 
 
-    def plotLogLog(self,X,Y,sysName,sysComp,speciesList,row=1,col=1,showlegend=True):
+
+    def plotEnrich(self,enrich_list,fname,lipids,row=1,col=1,showlegend=True):
 
         self.fig.update_layout(
                 margin=dict(l=20,r=20,t=20,b=20),
@@ -270,35 +232,101 @@ class GenPlot:
                 plot_bgcolor='white',
                 showlegend = True,
                 legend=dict(
-                            x=0.4,
+                            x=0.7,
                             y=1.0,
                             bgcolor='rgba(0,0,0,0)'
                             ),
                 legend_font_size=20,
                 )
 
-        for idx, species in enumerate(speciesList):
+        # initialise x and y data structures
+        x, y = [], pd.DataFrame()
 
-            self.fig.add_trace(go.Scatter(
-                                x=X[idx],
-                                y=Y[idx],
-                                showlegend=True,
-                                name=str(sysName) + ' (' + str(species) + ')',
-                                mode='lines',
-                                line=dict(width=5,
-                                          color=self.color_dict_loglog.get(species),
-                                          dash='solid' if species != 'TIP3_lower' else 'dot'),
-                                marker=dict(size=15,
-                                            symbol='square',
-                                            ),
-                                opacity=self.params['opacity'],
-                                ),
-                            row=row,
-                            col=col
-                            )
-        # self.fig.add_vrect(x0=0.5, x1=10, line_width=0, fillcolor="red", opacity=0.2)
-        self.fig.update_layout(yaxis_nticks=5)
-        self.fig.update_layout(xaxis_nticks=5)
+        # iterate through each of the enrichment dataframes
+        for rep, df in enumerate(enrich_list):
+
+            # for each df filter the needed rows via the label column into another df
+            for lipid in lipids:
+                _ = df.loc[df['Label']==lipid]
+
+                # iterate through column names to get the data series
+                for LIPID in lipids:
+
+                    # store frames - frame0 as x values
+                    x.append( _.loc[:,'Frame'] - _['Frame'].iloc[0] )
+
+                    # create enrichment column name
+                    column = f'{rep+1}_{lipid}-{LIPID}'
+
+                    # convert series to list for functional data processing
+                    series = list(_.loc[:,'fe'+LIPID])
+
+                    # store in df called y
+                    y[column] = series
+
+        # initialise data structures
+        Y, _, done_list = pd.DataFrame(), pd.DataFrame(), []
+
+        # create a list of the columns in the y df
+        columns = y.columns.values.tolist()
+
+        # iterate through the columns in the list
+        for column in columns:
+
+            # get the repeat number (sample number)
+            rep = column.split('_')[0]
+
+            # get the name of the system, e.g. CHOL with respect to CHOL
+            name = column.split('_')[1]
+
+            # if the system name has not been stored in done_list, perform average
+            # this prevents repeat data processing
+            if name not in done_list:
+
+                # add name to list of analyses completed 
+                done_list.append(name)
+
+                # define list of column names that have the same name (different repeat number)
+                headers = [col for col in columns if col.split('_')[1] == name]
+
+                # slice the y df via the headers list
+                df = y[headers]
+
+                # calculate the average and standard deviation
+                y_av, y_std = df.mean(axis=1), df.std(axis=1)
+
+                # add trace to figure
+                self.fig.add_trace(go.Scatter(
+                                    x=x[0],
+                                    y=y_av,
+                                    error_y=dict(
+                                            type='data',
+                                            array=y_std,
+                                            visible=True),
+                                    showlegend=True,
+                                    name=name,
+                                    mode='lines+markers',
+                                    line=dict(width=3,
+                                              color=self.colors_violin.get(name.split('-')[0]),
+                                              dash='solid' if name.split('-')[0] == name.split('-')[1] else 'dot'
+                                              ),
+                                    marker=dict(size=10,
+                                                symbol='square' if name.split('-')[0] == name.split('-')[1] else 'circle',
+                                                color=self.colors_violin.get(name.split('-')[0]),
+                                                line=dict(
+                                                    color='black',
+                                                    width=0.5,
+                                                    ),
+                                                ),
+                                    opacity=0.8,
+                                    ),
+                                row=row,
+                                col=1, # can't be 'col' as this is used above
+                                )
+
+        # update axis parameters
+        self.fig.update_yaxes(range=[0.5,2.0],title_standoff=20)
+        self.fig.update_xaxes(title_standoff=20)
 
 
 

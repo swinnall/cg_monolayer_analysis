@@ -5,7 +5,6 @@ import pandas as pd
 import sys
 import os
 import warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 # gromacs
 import MDAnalysis as mda
@@ -22,38 +21,53 @@ import calc_enrich
 import calc_sld
 import calc_rdf
 import calc_contact
-import get_system
+import file_tree
 
 
-def get_universe(dir):
+def get_universe(dir,fname,rep):
 
-    XTC = dir + 'p.xtc'
+    path = dir + '/' + fname + '/'
 
-    GRO = dir + 'p.gro'
+    stride = False
+    for fname in os.listdir(path):
+        if 'stride' in fname:
+            stride = True
 
-    TPR = dir + 'p.tpr'
 
+    # define file names
+    if rep != None:
+
+        XTC = path + f'p_{rep}_stride.xtc' if stride == True else path + f'p_{rep}.xtc'
+        GRO = path + f'p_{rep}.gro'
+        TPR = path + f'p_{rep}.tpr'
+
+    else:
+        XTC = path + 'p.xtc'
+        GRO = path + 'p.gro'
+        TPR = path + 'p.tpr'
+
+    # load universe
     if os.path.isfile(TPR) == True and os.path.isfile(XTC) == True:
         u = mda.Universe(TPR, XTC, continuous=True)
-        print('\nLoaded universe: %s.' %dir)
+        print('\nLoaded files: \n %s \n %s' %(TPR,XTC))
         print('Trajectory Size: %d frames.' %len(u.trajectory))
 
     elif os.path.isfile(GRO) == True and os.path.isfile(XTC) == True:
         u = mda.Universe(GRO, XTC, continuous=True)
-        print('\nLoaded universe: %s.' %dir)
+        print('\nLoaded files: \n %s \n %s' %(GRO,XTC))
         print('Trajectory Size: %d frames.' %len(u.trajectory))
 
     else:
         u = None
-        print(f'\nFile in dir ({dir}) does not exist - skipping.\n')
+        print(f'\nFile in dir ({path}) does not exist - skipping.\n')
 
     return u
 
 
 
-def get_fig_pars(analysisType):
+def get_fig_pars(analysis):
 
-    if analysisType == 'apm':
+    if analysis == 'apm':
         par = dict(x_axisType = 'linear',
                         y_axisType = 'linear',
                         xAxisText = '',
@@ -61,7 +75,7 @@ def get_fig_pars(analysisType):
                         saveName  = 'apm',
                         )
 
-    if analysisType == 'thick':
+    if analysis == 'thick':
         par = dict(x_axisType = 'linear',
                         y_axisType = 'linear',
                         xAxisText = '',
@@ -69,7 +83,7 @@ def get_fig_pars(analysisType):
                         saveName  = 'thick',
                         )
 
-    if analysisType == 'scc':
+    if analysis == 'scc':
         par = dict(x_axisType = 'linear',
                         y_axisType = 'linear',
                         xAxisText = r'$\huge{C_i}$',
@@ -77,15 +91,15 @@ def get_fig_pars(analysisType):
                         saveName  = "scc",
                         )
 
-    if analysisType == 'enrich':
+    if analysis == 'enrich':
         par = dict(x_axisType = 'linear',
                         y_axisType = 'linear',
-                        xAxisText = "Frame Number",
-                        yAxisText =  "Enrichment Index",
+                        xAxisText = r"$\huge{\text{Frame Number}}$",
+                        yAxisText =  r"$\huge{\text{Enrichment Index}}$",
                         saveName  = "enrich",
                         )
 
-    if analysisType == 'sld':
+    if analysis == 'sld':
         par = dict(x_axisType = 'linear',
                 y_axisType = 'linear',
                 xAxisText = r'$\huge{\rm{Z \ \left(\mathring{A}\right) }}$',
@@ -93,7 +107,7 @@ def get_fig_pars(analysisType):
                 saveName  = "sld",
                 )
 
-    if analysisType == 'refl':
+    if analysis == 'refl':
         par = dict(x_axisType = 'linear',
                     y_axisType = 'log',
                     xAxisText = r'$\huge{ \rm{Q \ \left(\mathring{A}^{-1}\right) }}$',
@@ -101,7 +115,7 @@ def get_fig_pars(analysisType):
                     saveName  = "R",
                     )
 
-    if analysisType == 'rdf':
+    if analysis == 'rdf':
         par = dict(x_axisType = 'linear',
                     y_axisType = 'linear',
                     xAxisText = r'$\huge{r \rm{(\mathring{A})}}$',
@@ -109,7 +123,7 @@ def get_fig_pars(analysisType):
                     saveName  = "rdf",
                     )
 
-    if analysisType == 'contact':
+    if analysis == 'contact':
         par = dict(x_axisType = 'linear',
                     y_axisType = 'linear',
                     xAxisText = "PolyA",
@@ -120,89 +134,81 @@ def get_fig_pars(analysisType):
     return par
 
 
-def get_chol_perc(sysComp):
-
-    # define percentage of cholesterol
-    if 'CHOL' not in sysComp:
-        cholPerc = '0'
-        leaflet_str = "name N1"
-
-    elif 'CHOL' in sysComp and '25' in sysComp:
-        cholPerc = '25'
-        leaflet_str = 'name N1 ROH'
-
-    elif 'CHOL' in sysComp and '43' in sysComp:
-        cholPerc = '43.5'
-        leaflet_str = "name N1 ROH"
-
-    # create corresponding string for labelling
-    cholName = cholPerc + '% chol.'
-
-    return cholName, leaflet_str
-
-
-
-# get root folder
-root = get_system.root
-
-
-# get the system matrix
-sysMat = get_system.sysMat
-
-
-# define number of rows and columns
-nRows = np.shape(sysMat)[0]
-nCols = np.shape(sysMat)[1]
+## ---------------------------------------------------------------------------##
 
 # choose which analysis to perform: apm / thick / scc / enrich / sld / rdf / contact
-analysisType = 'enrich'
+analysis = 'enrich'
+
+# set the starting frame
+frame0 = -200
+
+## ---------------------------------------------------------------------------##
+
+
+# disable warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
+# keep these words if in components
+keep_lipid = set(['MC3','MC3H','LIPID5','LIPID5H','CHOL'])
+
+# keep these words if in components
+keep_amount = set(['25','43'])
+
+# get root folder
+dir = '../input/' + file_tree.dir
+
+# get the system matrix
+fmat = file_tree.mat
+
+# define number of rows and columns
+nRows = np.shape(fmat)[0]
+nCols = np.shape(fmat)[1]
 
 # initialise figure class object
 # violin plots have one column only, rest have nCols
 fig = GenPlot(rows=nRows,cols=1,subplot_titles='')
 
 # get the parameters to define figure axes
-fig_par = get_fig_pars(analysisType)
+fig_par = get_fig_pars(analysis)
 
 # define second plot if dealing with SLD generation and get NR data
-if analysisType == 'sld':
+if analysis == 'sld':
     fig2 = GenPlot(rows=nRows,cols=1,subplot_titles='')
     fig_par2 = get_fig_pars('refl')
     Q, expNR, expNR_err, labels = getNRdata(nCols)
 
-# set the starting frame
-frame0 = -50
-
+list_enrich = []
 
 # iterate through each system in sysmat and call analysis module
 for row in range(nRows):
     for col in range(nCols):
 
         # access name for given figure element
-        sysName = sysMat[row][col]
+        fname = fmat[row][col]
 
         # create a list of the system components
-        sysComp = sysName.split('_')
+        components = fname.split('_')
 
-        # define the file directory
-        dir = '../'+root+'/'+sysName+'/'
+        # make everything capital letters
+        components = [str.upper() for str in components]
+
+        # make list of lipids from the input components
+        lipids = [str for str in components if str in keep_lipid]
+
+        # extract percentage cholesterol in simulation, should be one value
+        chol_percentage = [num for num in components if num in keep_amount]
+
+        # define cholesterol name
+        if chol_percentage != []:
+            cholName = chol_percentage[0] + '% chol.'
+        else:
+            cholName = '0% chol.'
+
+        # define rep if there are repeats or not: row+1 / None
+        rep = col+1 
 
         # get universe
-        u = get_universe(dir)
-
-        # get the amount of cholesterol in the system
-        cholName, leaflet_str = get_chol_perc(sysComp)
-
-        # get leaflets
-        if analysisType in ['apm'] and u != None:
-
-            print('\nAssigning leaflets:')
-
-            leaflets = AssignLeaflets(
-              universe=u,
-              lipid_sel=leaflet_str,
-            )
-            leaflets.run(start=frame0, stop=None, step=None, verbose=True)
+        u = get_universe(dir,fname,rep)
 
 
         """
@@ -210,8 +216,8 @@ for row in range(nRows):
         """
 
         # reset column to zero for correct plotting
-        if analysisType in ['apm','thick','enrich','sld']:
-            if analysisType == 'sld':
+        if analysis in ['apm','thick','enrich','sld']:
+            if analysis == 'sld':
                 Q_ = Q.get(col)
                 expNR_ = expNR.get(col)
                 expNR_err_ = expNR_err.get(col)
@@ -243,30 +249,30 @@ for row in range(nRows):
         Analysis modules
         """
 
-        if analysisType == 'apm':
+        if analysis == 'apm':
             if u != None:
-                df, mean, se = calc_apm.main(u,leaflets,sysComp,frame0)
+                df = calc_apm.main(u,lipids,frame0)
             else:
-                df = pd.DataFrame(columns=[sysComp[0],'CHOL'])
-            fig.plotViolin_halves(df,sysComp,cholName,row=row+1,col=col+1,showlegend=False)
+                df = pd.DataFrame(columns=[lipids[0],'CHOL'])
+            fig.plotViolin(df,lipids,cholName,row=row+1,col=col+1,showlegend=False)
 
-        if analysisType == 'thick':
-            df, mean, se = calc_thick.main(u,sysComp,frame0)
-            fig.plotViolin_halves(df,sysComp,cholName,row=row+1,col=col+1,showlegend=False)
+        if analysis == 'thick':
+            if u != None:
+                df = calc_thick.main(u,lipids,frame0)
+            else:
+                df = pd.DataFrame(columns=[lipids[0],'CHOL'])
+            fig.plotViolin(df,lipids,cholName,row=row+1,col=col+1,showlegend=False)
 
-        if analysisType == 'scc':
-            calc_scc.main(u,sysName)
+        if analysis == 'scc':
+            calc_scc.main(u,fname,frame0,rep)
 
-        if analysisType == 'enrich':
-            x, y = calc_enrich.main(u,sysComp,frame0)
-            speciesList = ["feCHL1","feDLMC3"]
-            fig.plotLogLog(x,y,sysName,sysComp,speciesList,row=row+1,col=col+1,showlegend=True)
-            outputDir = f'output/{fig_par.get("saveName")}_{sysName}'
-            fig.fig.write_image(outputDir+'.png',scale=5)
+        if analysis == 'enrich':
+            df = calc_enrich.main(u,lipids,frame0)
+            list_enrich.append(df)
 
-        if analysisType == 'sld':
+        if analysis == 'sld':
 
-            SLD_x, SLD_y, contrast, nFrames, q, R = calc_sld.main(u,sysComp,label_,Q_,frame0)
+            SLD_x, SLD_y, contrast, nFrames, q, R = calc_sld.main(u,lipids,label_,Q_,frame0)
 
             fig.plotSLD(SLD_x,SLD_y,contrast,nFrames,col_orig,row=row+1,col=col+1,showlegend=True)
 
@@ -274,21 +280,21 @@ for row in range(nRows):
             fig2.update_yaxis(fig_par2.get('yAxisText'),show_yticklabels,fig_par2.get('y_axisType'),row=row+1,col=col+1)
             fig2.plotR(contrast,nFrames,q,R,Q_,expNR_,expNR_err_,label_,col_orig,row=row+1,col=col+1,showlegend=True)
 
-            outputDir = f'output/{fig_par.get("saveName")}_{sysName}'
+            outputDir = f'../output/{fig_par.get("saveName")}_{fname}'
             fig.fig.write_image(outputDir+'.png',scale=5)
             fig2.fig.write_image(outputDir+'_refl.png',scale=5)
 
 
-        if analysisType == 'rdf':
-            x, y = calc_rdf.main(u,sysComp,frame0)
-            speciesList = ["MC3"] if 'CHOL' not in sysComp else ["MC3","CHOL"]
-            fig.plotLogLog(x,y,sysName,sysComp,speciesList,row=row+1,col=col+1,showlegend=False)
+        if analysis == 'rdf':
+            x, y = calc_rdf.main(u,lipids,frame0)
+            speciesList = ["MC3"] if 'CHOL' not in lipids else ["MC3","CHOL"]
+            fig.plotLogLog(x,y,fname,lipids,speciesList,row=row+1,col=col+1,showlegend=False)
 
 
 
-        if analysisType == 'contact':
+        if analysis == 'contact':
 
-            contacts_mat, xticklabels, yticklabels = calc_contact.main(u,sysComp,frame0)
+            contacts_mat, xticklabels, yticklabels = calc_contact.main(u,lipids,frame0)
 
             if row == nRows-1:
                 xAxisLabel = "PolyA atoms"# (" + atom_str + ")"
@@ -317,10 +323,16 @@ for row in range(nRows):
 """
 Show and save figures
 """
-if analysisType not in ['scc','enrich','sld','contact']:
-    outputDir = f'output/{fig_par.get("saveName")}/{fig_par.get("saveName")}_{sysName}'
+if analysis not in ['scc','enrich','sld','contact']:
+    outputDir = f'../output/{fig_par.get("saveName")}/{fig_par.get("saveName")}_{fname}'
     fig.fig.write_image(outputDir+'.png',scale=5)
 
-if analysisType == 'contact':
-    outputDir = f'output/{fig_par.get("saveName")}/{fig_par.get("saveName")}_{contact_type}.png'
+if analysis == 'contact':
+    outputDir = f'../output/{fig_par.get("saveName")}/{fig_par.get("saveName")}_{contact_type}.png'
     fig.fig.write_image(outputDir,scale=5)
+
+if analysis == 'enrich':
+    fig.plotEnrich(list_enrich,fname,lipids,row=row+1,col=col+1,showlegend=True)
+
+    outputDir = f'../output/enrich/{fig_par.get("saveName")}_{fname}'
+    fig.fig.write_image(outputDir+'.png',scale=5)

@@ -5,73 +5,68 @@ import sys
 import lipyphilic
 from lipyphilic.lib.area_per_lipid import AreaPerLipid
 
-
-def getAreaStatistics(sysComp,membrane,areas):
-
-    cil_str = sysComp[0]
-
-    if 'CHOL' not in sysComp:
-
-        mc3_mask = membrane.resnames == cil_str
-        mc3_areas = areas.areas[mc3_mask]
-
-        flat_lipidAPM_df_mc3 = pd.DataFrame(mc3_areas[:,:].flatten(), columns=[cil_str])
-        print("\n\n%s" %flat_lipidAPM_df_mc3.describe())
-        print("\nStandard Error:\n%s" %flat_lipidAPM_df_mc3.sem())
-
-        mean = [flat_lipidAPM_df_mc3.describe().loc[['mean']].iloc[0]]
-        se = [flat_lipidAPM_df_mc3.sem()]
-
-        return flat_lipidAPM_df_mc3, mean, se
-
-
-    else:
-
-        mc3_mask  = membrane.resnames == cil_str
-        chol_mask = membrane.resnames == "CHOL"
-
-        mc3_areas  = areas.areas[mc3_mask]
-        chol_areas = areas.areas[chol_mask]
-
-        flat_lipidAPM_df_mc3 = pd.DataFrame(mc3_areas[:,:].flatten(), columns=[cil_str])
-        print("\n\n%s" %flat_lipidAPM_df_mc3.describe())
-        print("\nStandard Error:\n%s" %flat_lipidAPM_df_mc3.sem())
-
-        flat_lipidAPM_df_chol = pd.DataFrame(chol_areas[:,:].flatten(), columns=['CHOL'])
-        print("\n\n%s" %flat_lipidAPM_df_chol.describe())
-        print("\nStandard Error:\n%s" %flat_lipidAPM_df_chol.sem())
-
-        numbers = flat_lipidAPM_df_chol['CHOL']
-        df = flat_lipidAPM_df_mc3.join(numbers)
-
-        mean_mc3  = flat_lipidAPM_df_mc3.describe().loc[['mean']].iloc[0]
-        mean_chol = flat_lipidAPM_df_chol.describe().loc[['mean']].iloc[0]
-        mean = [mean_mc3,mean_chol]
-
-        se_mc3  = flat_lipidAPM_df_mc3.sem()
-        se_chol = flat_lipidAPM_df_chol.sem()
-        se = [se_mc3,se_chol]
-
-        return df, mean, se
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 
+def genstats(membrane,areas,mask_str):
 
-def main(u,leaflets,sysComp,frame0):
+    # create a mask of resnames in the membrane via input string
+    mask = membrane.resnames == mask_str
+
+    # apply mask to the areas previously calculated
+    areas = areas.areas[mask]
+
+    # create a dataframe
+    df = pd.DataFrame(areas[:,:].flatten(), columns=[mask_str])
+
+    # calculate the mean of the dataframe
+    mean = df.describe().loc[['mean']].iloc[0]
+
+    # calculate the standard error of the dataframe
+    se = df.sem()
+
+    # print full 'box plot' statistics
+    print("\n\n%s" %df.describe())
+
+    # print the standard error of the system
+    print("\nStandard Error:\n%s" %se)
+
+    return df
+
+
+
+def main(u,lipids,frame0):
 
     # filter warnings
     warnings.filterwarnings("ignore")
 
     # state system
-    print('\n\nSystem Components: %s' %(sysComp))
+    print('\n\nSystem lipids: %s' %(lipids))
+
+    # define leaflet string which should be head group atoms 
+    leaflet_str = "name GLA "
+
+    # add cholesterol bead to list if in simulation
+    if 'CHOL' in lipids:
+        leaflet_str = leaflet_str + "ROH"
+
+
+    print('\nAssigning leaflets:')
+
+    leaflets = AssignLeaflets(
+      universe=u,
+      lipid_sel=leaflet_str,
+    )
+    leaflets.run(start=frame0, stop=None, step=None, verbose=True)
+
 
     # define selection criteria
-    if 'CHOL' not in sysComp:
-        lipid_sel_str = 'name N1' # and not resname ADE
+    lipid_sel_str = 'name GLA ' # NP N1 ROH
 
-    else:
-        lipid_sel_str = 'name N1 ROH'
-
+    # add cholesterol bead to list if in simulation
+    if 'CHOL' in lipids:
+        lipid_sel_str = lipid_sel_str + 'ROH'
 
     # Calculate the area per lipid in each frame
     areas = AreaPerLipid(
@@ -81,17 +76,14 @@ def main(u,leaflets,sysComp,frame0):
     )
     areas.run(start=frame0, stop=None, step=None, verbose=True)
 
-
     # define membrane based on assign leaflets text
     membrane = u.select_atoms(lipid_sel_str)
 
+    # initialise dataframe
+    df = pd.DataFrame()
 
-    # get dataframe(s) and statistic(s)
-    df, mean, se = getAreaStatistics(sysComp,membrane,areas)
+    # for each lipid component in the system, generate statistics and store values
+    for lipid in lipids:
+            df[lipid] = genstats(membrane,areas,lipid)
 
-
-    return df, mean, se
-
-
-if __name__ == '__main__':
-    main()
+    return df

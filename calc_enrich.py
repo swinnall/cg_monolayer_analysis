@@ -8,51 +8,62 @@ import lipyphilic
 from lipyphilic.lib.neighbours import Neighbours
 
 
-def main(u,sysComp,frame0):
 
-    # NB: only vlaid for systems with cholesterol
+def main(u,lipids,frame0):
 
     # filter warnings
     warnings.filterwarnings("ignore")
 
-    # calculate whether bead is within the cutoff for listed bead names
-    neighbours = Neighbours(
-        universe=u,
-        lipid_sel="name N1 ROH",
-        cutoff=12.0
-        )
 
+    # BEAD SELECTION (too long if use resname)
+    sel_str = "name NP ROH"
+
+
+    # calculate whether bead is within the cutoff for listed bead names
     # results available in neighbours.Neighbours as np array of matrices
+    print('\nCalculating neighbours:')
+    neighbours = Neighbours(universe=u,
+                            lipid_sel=sel_str,
+                            cutoff=12.0
+                            )
     neighbours.run(start=frame0,stop=None,step=None,verbose=True)
 
     # calculate enrichment index of lipid species
     # the number of each neighbour species B around a given reference species A
     # is normalized by the average number of species B around any lipid.
-    # returns two pandas dfs
     counts, enrichment = neighbours.count_neighbours(return_enrichment=True)
 
-    #
-    enrichment_filtered = enrichment.loc[enrichment['Label']=='CHOL']
-    # print(enrichment_filtered)
+    # enrichment is a n>2 column df where a given component is calculated against another
+    # e.g. Label = 'CHOL' has columns 'feCHOL' and 'feCIL'
+    # where it's enrichment/depletion of chol with respect to chol or CIL
+    # the frames column gives the frame of the calculation
+    # this is for beads (head) within the cutoff range (12 A default)
+    # print(enrichment)
 
-    y = [enrichment_filtered.loc[:,'feCHOL'],enrichment_filtered.loc[:,'feMC3H']]
-    # print(y)
+    # using labels with fe as prefix, this stands for fractional enrichment
+    # each df will have columns: Label, frame, fe..., fe..., ...
+    for lipid in lipids:
+        df = enrichment.loc[enrichment['Label']==lipid]
+        print(f'\nLipid: {lipid}')
 
-    print(f'\nAverage chol enrichment = {np.mean(y[0][-4000:]):.2f}')
-    print(f'Std chol enrichment = {np.std(y[0][-4000:]):.2f}')
-    print(f'Average CIL enrichment = {np.mean(y[1][-4000:]):.2f}')
-    print(f'Std CIL enrichment = {np.std(y[1][-4000:]):.2f}')
+        # within the dataframe iterate through the columns to get all values
+        for LIPID in lipids:
 
-    # define x axis (number of frames) based on length of y points
-    frames = [i for i in range(len(y[0]))]
-    x = [frames,frames]
+            # write column header
+            column = 'fe' + LIPID
 
-    # enrichment_chol = enrichment.loc[enrichment['Label']=='CHL1']
-    # enrichment_chol.plot(title='chol',x='Frame',y=['feCHL1','feDLMC3'])#,'feADE'])
-    # # print(enrichment_chol)
+            # access column from df
+            series = df.loc[:,column]
 
-    # enrichment_mc3 = enrichment.loc[enrichment['Label']=='DLMC3']
-    # enrichment_mc3.plot(title='mc3',x='Frame',y=['feCHL1','feDLMC3'])#,'feADE'])
-    # print(enrichment_mc3)
+            # calculate the mean fractional enrichment/depletion
+            mean = float(series.describe().loc[['mean']])
 
-    return x, y
+            # calculate the standard error of the dataframe
+            se = float(series.sem())
+
+            # print statistics to terminal
+            print(f'Average fe with respect to {LIPID} = {mean:.2f}')
+
+            # print("\n\n%s" %series.describe())
+
+    return enrichment
