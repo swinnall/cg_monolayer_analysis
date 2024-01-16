@@ -1,6 +1,9 @@
 from refnx.reflect import reflectivity
 import numpy as np
 import sys
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 
 """
 To do:
@@ -17,7 +20,7 @@ To do:
 
 class SLD:
 
-    def __init__(self,u,thickness,region_of_interest,z_pos_lower):
+    def __init__(self,u,thickness):
 
         # define scattering lengths (fm)
         self.SL_atoms_AA = {
@@ -99,12 +102,6 @@ class SLD:
         # number of slices
         self.slice_num = int(self.z_dimension/self.thickness)
 
-        # import region of interest
-        self.region_of_interest = region_of_interest
-
-        # import lower z position
-        self.z_pos_lower = z_pos_lower
-
 
 
     def calcSLD_oneFrame(self,frame,contrast):
@@ -174,15 +171,6 @@ class SLD:
 
 
 
-                # # only deuterate H atoms
-                # if 'dlipid' in contrast_components and ele == 'C'\
-                #     and atom.name not in mc3_H_atoms_list:
-
-                #         # swap H for D, assuming 100 % deuteration
-                #         SL =
-
-
-
 
             if resname in ['CHL1','CHOL'] and slice_key < self.slice_num:
 
@@ -240,31 +228,32 @@ class SLD:
         """
 
         # define SLD dictionary
-        SLD_dict = {}
+        self.SLD_dict = {}
 
         # divide SL by slice volume, multiply by 10 for units
         for key, value in SL_dict.items():
-            SLD_dict[key] = 10 * sum(value)/(self.x_dimension*self.y_dimension*self.thickness)
+            self.SLD_dict[key] = 10 * sum(value)/(self.x_dimension*self.y_dimension*self.thickness)
 
 
-        """
-        Clean data
-        """
 
-        # calculate upper z position
-        z_pos_upper = self.z_pos_lower + self.region_of_interest
+    def select_region(self,z0,z1,reverse_u):
+
+        # sometime universe needs to be reversed
+        if reverse_u == True:
+            reversed_values = list(self.SLD_dict.values())[::-1]
+            self.SLD_dict = {key: reversed_values[i] for i, key in enumerate(self.SLD_dict.keys())}
 
         # get key
-        key_lower = int(self.z_pos_lower/self.thickness)
-        key_upper = int(z_pos_upper/self.thickness)
+        key0 = int(z0/self.thickness)
+        key1 = int(z1/self.thickness)
 
         # initialise lists for final storage
         SLD_x, SLD_y = [], []
 
         # isolate first monolayer only
         idx = 1
-        for key, value in list(SLD_dict.items()):
-            if key > key_lower and key < key_upper:
+        for key, value in list(self.SLD_dict.items()):
+            if key > key0 and key < key1:
                 SLD_x.append(idx * self.thickness)
                 SLD_y.append(value)
                 idx += 1
@@ -277,7 +266,7 @@ class SLD:
 def main(u,sysComp,label_exp,Q_exp,frame0):
 
     # size of layer slice (slab thickness) Angstrom
-    thickness = 5
+    thickness = 2
 
     # number of frames to average across
     frame1 = frame0 + 10
@@ -285,15 +274,17 @@ def main(u,sysComp,label_exp,Q_exp,frame0):
     # define number of frames for plotting label
     nFrames = frame1 - frame0
 
-    # define z position for region of interest in angstroms
-    region_of_interest = 95 # default for acmw 65
-    z_pos_lower = 50 # monolayers = 20; polya = 50  / 90
+    # define z position for region of interest in ANGSTROMS
+    z0 = 40 # mono = 30; rna = 60
+    z1 = z0 + 90  # mono = 90; rna = 250
+
+    # set to True if e.g. RNA on right hand side and it needs to be mirrored
+    reverse_u = True
 
 
-    """
-    make H-D substitutions during the analysis based on received experimental file
-    strings are constructed from the LABEL of experimental data
-    """
+
+    ## make H-D substitutions during the analysis based on received experimental file
+    ## strings are constructed from the LABEL of experimental data
 
     # list of contrasts to be generated
     components = label_exp.upper().split()
@@ -314,30 +305,31 @@ def main(u,sysComp,label_exp,Q_exp,frame0):
 
 
 
-    """
-    iterate through all frames and store the scattering length density
-    """
+
+    ##iterate through all frames and store the scattering length density
 
     # each frame has a list that need sto be stored
     SLD_y_allFrames = []
 
     # initialise class
-    S = SLD(u,thickness,region_of_interest,z_pos_lower)
+    S = SLD(u,thickness)
 
     for frame in range(frame0,frame1):
         print('frame: %d/%d' %(frame+1-frame0,nFrames))
 
         # calculate SLD
-        SLD_x, SLD_y = S.calcSLD_oneFrame(frame,contrast)
+        S.calcSLD_oneFrame(frame,contrast)
+
+        # keep only the region one is interested in
+        SLD_x, SLD_y = S.select_region(z0,z1,reverse_u)
 
         # append totals to list
     SLD_y_allFrames.append(SLD_y)
 
 
 
-    """
-    average all SLD_y data for a given frame
-    """
+
+    ## average all SLD_y data for a given frame
 
     # define dict for averaged data, length based on SLD_x
     SLD_y_average = []
@@ -354,9 +346,7 @@ def main(u,sysComp,label_exp,Q_exp,frame0):
 
 
 
-    """
-    generate reflectivity from MD-SLD with refnx
-    """
+    ## generate reflectivity from MD-SLD with refnx
 
     # changing to refnx notation for clarity
     structure = SLD_y_average
@@ -390,12 +380,4 @@ def main(u,sysComp,label_exp,Q_exp,frame0):
     # calculate and store reflectivity
     R = list( reflectivity(q,slabs,bkg=bkg_) )
 
-
     return SLD_x, SLD_y_average, contrast, nFrames, q, R
-
-
-
-
-
-if __name__ == '__main__':
-    main()

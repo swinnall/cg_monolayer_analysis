@@ -62,7 +62,7 @@ def main(u,lipids,frame0):
             se = float(series.sem())
 
             # print statistics to terminal
-            print(f'Average fe with respect to {LIPID} = {mean:.2f}')
+            print(f'Average fe with respect to {LIPID} = {mean:.2f} +/- {se:.3f}')
 
             # print("\n\n%s" %series.describe())
 

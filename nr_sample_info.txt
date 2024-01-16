@@ -5,7 +5,7 @@ fname,contrast,lipid,ratio,label
 # file_name,subphase_lipid,lipid1:lipid2,ratio1:ratio2,label_description
 #
 # --------------------------------------------------------------------------- #
-# 9-13-1054: Interal LNP composition ILL Jun23
+# 9-13-1054: Internal LNP composition ILL Jun23
 #
 # SET 3. l5:chol (75:25) pH 3 polyA
 #s03-1,d2o_hlipid_dpolya,lipid_5:chol,75:25,h-lipid D<sub>2</sub>O dPolyA
@@ -78,7 +78,7 @@ fname,contrast,lipid,ratio,label
 #
 #
 # --------------------------------------------------------------------------- #
-# RB2220338: Interal LNP composition ISIS Feb23
+# RB2220338: Internal LNP composition ISIS Feb23
 #
 # 0 % chol pH 3 [samples 07-12]
 #IvsQ_69776_69777,d2o_hlipid,mc3,100,h-lipid D<sub>2</sub>O
@@ -106,9 +106,9 @@ fname,contrast,lipid,ratio,label
 #s01-3,acmw_dlipid,d62_mc3:d45_chol,75:25,d-lipid ACMW
 #
 # 25 % chol pH 3 w/ polyA
-IvsQ_69774_69775,d2o_hlipid_dPolyA,mc3:chol,75:25,h-lipid D<sub>2</sub>O
-IvsQ_69772_69773,d2o_dlipid_dPolyA,d62_mc3:d45_chol,75:25,d-lipid D<sub>2</sub>O
-IvsQ_69770_69771,acmw_dlipid_hPolyA,d62_mc3:d45_chol,75:25,d-lipid ACMW
+#IvsQ_69774_69775,d2o_hlipid_dPolyA,mc3:chol,75:25,h-lipid D<sub>2</sub>O
+#IvsQ_69772_69773,d2o_dlipid_dPolyA,d62_mc3:d45_chol,75:25,d-lipid D<sub>2</sub>O
+#IvsQ_69770_69771,acmw_dlipid_hPolyA,d62_mc3:d45_chol,75:25,d-lipid ACMW
 #
 # ILL JUNE DATA - mc3:chol (75:25) pH 3 polyA
 #s02-1,d2o_hlipid_dpolya,mc3:chol,75:25,h-lipid D<sub>2</sub>O dPolyA
@@ -119,9 +119,9 @@ IvsQ_69770_69771,acmw_dlipid_hPolyA,d62_mc3:d45_chol,75:25,d-lipid ACMW
 #
 #
 # 43.5 % chol pH 3 [samples 13-18]
-#IvsQ_69788_69789,d2o_hlipid,mc3:chol,56.5:43.5,h-lipid D<sub>2</sub>O
-#IvsQ_69790_69791,d2o_dlipid,d62_mc3:d45_chol,56.5:43.5,d-lipid D<sub>2</sub>O
-#IvsQ_69792_69793,acmw_dlipid,d62_mc3:d45_chol,56.5:43.5,d-lipid ACMW
+IvsQ_69788_69789,d2o_hlipid,mc3:chol,56.5:43.5,h-lipid D<sub>2</sub>O
+IvsQ_69790_69791,d2o_dlipid,d62_mc3:d45_chol,56.5:43.5,d-lipid D<sub>2</sub>O
+IvsQ_69792_69793,acmw_dlipid,d62_mc3:d45_chol,56.5:43.5,d-lipid ACMW
 #
 # 43.5 % chol pH 3 w/ polyA
 #IvsQ_69798_69799,d2o_hlipid_dPolyA,mc3:chol,56.5:43.5,h-lipid D<sub>2</sub>O

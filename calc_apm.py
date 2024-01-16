@@ -4,6 +4,7 @@ import sys
 
 import lipyphilic
 from lipyphilic.lib.area_per_lipid import AreaPerLipid
+from lipyphilic.lib.assign_leaflets import AssignLeaflets
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -37,6 +38,7 @@ def genstats(membrane,areas,mask_str):
 
 
 def main(u,lipids,frame0):
+    lipids = ['MC3H']
 
     # filter warnings
     warnings.filterwarnings("ignore")
@@ -44,29 +46,25 @@ def main(u,lipids,frame0):
     # state system
     print('\n\nSystem lipids: %s' %(lipids))
 
-    # define leaflet string which should be head group atoms 
-    leaflet_str = "name GLA "
+    # define leaflet string - NP N1 GLA GLB ROH beads
+    lipid_sel_str = "name NP  "
 
     # add cholesterol bead to list if in simulation
     if 'CHOL' in lipids:
-        leaflet_str = leaflet_str + "ROH"
+        # lipid_sel_str = lipid_sel_str + "and (resname CHOL and name ROH)"
+        lipid_sel_str = lipid_sel_str + "ROH"
 
 
     print('\nAssigning leaflets:')
 
     leaflets = AssignLeaflets(
       universe=u,
-      lipid_sel=leaflet_str,
+      lipid_sel=lipid_sel_str,
     )
     leaflets.run(start=frame0, stop=None, step=None, verbose=True)
 
 
-    # define selection criteria
-    lipid_sel_str = 'name GLA ' # NP N1 ROH
-
-    # add cholesterol bead to list if in simulation
-    if 'CHOL' in lipids:
-        lipid_sel_str = lipid_sel_str + 'ROH'
+    print('\nCalculating areas:')
 
     # Calculate the area per lipid in each frame
     areas = AreaPerLipid(
@@ -84,6 +82,6 @@ def main(u,lipids,frame0):
 
     # for each lipid component in the system, generate statistics and store values
     for lipid in lipids:
-            df[lipid] = genstats(membrane,areas,lipid)
+        df[lipid] = genstats(membrane,areas,lipid)
 
     return df

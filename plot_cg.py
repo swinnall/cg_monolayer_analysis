@@ -67,6 +67,7 @@ class GenPlot:
         # color dictionary for violin plots
         self.colors_violin = dict(MC3 = '#116C6E',
                                       MC3H = '#8F011B',
+                                      LI5H = '#8F011B',
                                       # MC3H_10p = '#4A8515',
                                       CHOL = '#e28743',
                                       )
@@ -136,7 +137,7 @@ class GenPlot:
                               # nticks=5,
                               type=axisType,
                               exponentformat='power',
-                              title_standoff=40,
+                              title_standoff=30,
                               row=row,
                               col=col
                               )
@@ -145,7 +146,7 @@ class GenPlot:
     def update_yaxis(self,ylabel='',showticklabels=True,axisType='linear',row=1,col=1):
 
         self.fig.update_yaxes(title_text='<b>'+ylabel+'</b>',
-                              range=[0,30], # apm=[0,150]; thick=[0,30]
+                              range=[0,150], # apm=[0,150]; thick=[0,30]
                               showline= True,
                               linecolor= 'black',
                               linewidth=5,
@@ -158,7 +159,7 @@ class GenPlot:
                               # nticks=10,
                               type=axisType,
                               exponentformat='power',
-                              title_standoff=40,
+                              title_standoff=30,
                               row=row,
                               col=col
                               )
@@ -188,11 +189,12 @@ class GenPlot:
         # I don't want to do this but need a quick fix.
         # re-populating lipids with all possible components
         # to plot empty dataset so they're all the same width
-        lipids = ['MC3H','MC3','CHOL']
+        # lipids = ['MC3H','CHOL']
+        # lipids = ['LI5H','CHOL']
 
         for lipid in lipids:
 
-            # if dataset doesn't exist, an column with out of range values is created
+            # if dataset doesn't exist, a column with out of range values is created
             try: _ = df.loc[:,lipid]
             except KeyError: df[lipid] = -1 #np.nan
 
@@ -283,7 +285,7 @@ class GenPlot:
             # this prevents repeat data processing
             if name not in done_list:
 
-                # add name to list of analyses completed 
+                # add name to list of analyses completed
                 done_list.append(name)
 
                 # define list of column names that have the same name (different repeat number)
@@ -354,21 +356,40 @@ class GenPlot:
                         )
 
 
-    def plotHeatMap(self,X,Y,Z,row=1,col=1):
+    def plotHeatMap(self,X,Y,Z_av,Z_std,row=1,col=1):
 
-        max_z = np.max(Z)
-        Z = Z / max_z
-        # print(max_z)
-        # print(Z)
+        str_mat1 = [[f'{val:.1f}' for val in row] for row in Z_av]
+        str_mat2 = [[f'{val:.1f}' for val in row] for row in Z_std]
+
+        # Combine matrices with strings separated by ± symbol
+        Z_str = [
+            [f'{val1} ± {val2}' for val1, val2 in zip(row1, row2)]
+            for row1, row2 in zip(str_mat1, str_mat2)
+        ]
 
         self.fig.add_trace(go.Heatmap(
                                     x=X,
                                     y=Y,
-                                    z=Z,
+                                    z=Z_av,
                                     # zsmooth='best',
+                                    colorbar=dict(
+                                            title='Counts',
+                                            ticks='',
+                                            tickwidth=2.5,
+                                            len=1.045,
+                                            # borderwidth=2.5,
+                                            # size=24,
+                                            # titleside='right',
+                                            yanchor='top',
+                                            y=1.025,
+                                            x=1,
+                                            ),
+                                    text=Z_str,
+                                    texttemplate='%{text}',
+                                    textfont=dict(size=14)
                                     ),
-                            row=row,
-                            col=col
+                            row=1,
+                            col=1
                             )
         self.fig.update_layout(xaxis_nticks=len(X))
         self.fig.update_layout(yaxis_nticks=len(Y))
@@ -395,8 +416,8 @@ class GenPlot:
                 plot_bgcolor='white',
                 showlegend = True,
                 legend=dict(
-                            x=0.0,
-                            y=1.0,
+                            x=0.6,
+                            y=0.3,
                             bgcolor='rgba(0,0,0,0)'
                             ),
                 legend_font_size=20,
@@ -441,7 +462,8 @@ class GenPlot:
                             x=0.4,
                             y=1,
                             bgcolor='rgba(0,0,0,0)',
-                            title='25 % chol. pH 3.0<br>CG: N = 338 PolyA 10nt',
+                            # title='0 % chol. pH 3.0<br>CG: N = 338 PolyA 10nt',
+                            title='43.5 % chol. pH 3.0',
                             ),
                 legend_font_size=20,
                 )

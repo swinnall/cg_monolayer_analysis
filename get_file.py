@@ -7,8 +7,6 @@ def getFile(path,nSkip,delim):
 
 def getNRdata(nCols):
 
-    print('\nLoading experimental neutron data.')
-
     """
     Read sample information from instructions file
     """
@@ -21,7 +19,7 @@ def getNRdata(nCols):
 
     file_paths, inputLabels, contrastList = {}, {}, []
 
-    dir = '../../../../../github/analysisNR/input/RB2220338-MC3/ASCII_Feb23_sw2/'
+    dir = '../../../nr/input/RB2220338-MC3/ASCII_Feb23_sw2/'
 
     for i in range(nFiles):
 
@@ -30,6 +28,8 @@ def getNRdata(nCols):
 
         file_paths[contrast] = dir + instructionsFile["fname"][i] + ".txt"
         inputLabels[contrast] = instructionsFile["label"][i]
+
+    print(f'\nLoaded NR files: \n{file_paths}')
 
     """
     Read experimental data

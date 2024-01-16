@@ -8,7 +8,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 ext = 'pdb'
 
 # define starting directory
-dir = '../input/mc3_rna_20nt/'
+dir = '../input/lipid5_rna_10nt/'
 
 # walk through input file directory
 for root, dirs, files in os.walk(dir):

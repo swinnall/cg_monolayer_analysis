@@ -5,11 +5,7 @@ import pandas as pd
 import sys
 import os
 import warnings
-
-# gromacs
 import MDAnalysis as mda
-import lipyphilic
-from lipyphilic.lib.assign_leaflets import AssignLeaflets
 
 # for this program
 from get_file import getFile, getNRdata
@@ -49,12 +45,12 @@ def get_universe(dir,fname,rep):
     # load universe
     if os.path.isfile(TPR) == True and os.path.isfile(XTC) == True:
         u = mda.Universe(TPR, XTC, continuous=True)
-        print('\nLoaded files: \n %s \n %s' %(TPR,XTC))
+        print('\nLoaded MD files: \n %s \n %s' %(TPR,XTC))
         print('Trajectory Size: %d frames.' %len(u.trajectory))
 
     elif os.path.isfile(GRO) == True and os.path.isfile(XTC) == True:
         u = mda.Universe(GRO, XTC, continuous=True)
-        print('\nLoaded files: \n %s \n %s' %(GRO,XTC))
+        print('\nLoaded MD files: \n %s \n %s' %(GRO,XTC))
         print('Trajectory Size: %d frames.' %len(u.trajectory))
 
     else:
@@ -137,10 +133,10 @@ def get_fig_pars(analysis):
 ## ---------------------------------------------------------------------------##
 
 # choose which analysis to perform: apm / thick / scc / enrich / sld / rdf / contact
-analysis = 'enrich'
+analysis = 'contact'
 
 # set the starting frame
-frame0 = -200
+frame0 = -25 #-25
 
 ## ---------------------------------------------------------------------------##
 
@@ -149,7 +145,7 @@ frame0 = -200
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 # keep these words if in components
-keep_lipid = set(['MC3','MC3H','LIPID5','LIPID5H','CHOL'])
+keep_lipid = set(['MC3','MC3H','LIPID5','LIPID5H','LI5H','CHOL'])
 
 # keep these words if in components
 keep_amount = set(['25','43'])
@@ -177,7 +173,7 @@ if analysis == 'sld':
     fig_par2 = get_fig_pars('refl')
     Q, expNR, expNR_err, labels = getNRdata(nCols)
 
-list_enrich = []
+list_enrich, list_contacts_mat = [], []
 
 # iterate through each system in sysmat and call analysis module
 for row in range(nRows):
@@ -205,7 +201,10 @@ for row in range(nRows):
             cholName = '0% chol.'
 
         # define rep if there are repeats or not: row+1 / None
-        rep = col+1 
+        rep = col+1
+
+        # ensure using the same (p1) input file for the sld calculations
+        if analysis == 'sld': rep = 2
 
         # get universe
         u = get_universe(dir,fname,rep)
@@ -294,10 +293,32 @@ for row in range(nRows):
 
         if analysis == 'contact':
 
+            # Select atoms based on the specified resnames
+            ag_cil = u.select_atoms(f"resname MC3H LI5H")
+            ag_chol = u.select_atoms(f"resname CHOL")
+            ag_rna = u.select_atoms(f"resname A")
+
+            # Get the number of different residue IDs
+            nCIL = len(set(ag_cil.resids))
+            nCHOL = len(set(ag_chol.resids))
+            nNT = len(set(ag_rna.resids)) # note each nucleotide has different resid)
+
+            # setting the normalisation factors
+            # normFactor = nNT; normString = 'nNT' # RNA - RNA
+            # normFactor = nCHOL * nNT; normString = 'nChol * nNT' # CHOL - RNA
+            normFactor = nCIL * nNT; normString = 'nCIL * nNT' # CIL - RNA
+            # normFactor = nCIL * nCHOL; normString = 'nCIL * nCHOL' # CIL - CHOL
+
+            print(f'\nContact Normalisation\nnCIL={nCIL},nChol={nCHOL},nNucleo={nNT}\nnormalisation={normString} = {normFactor}')
+
             contacts_mat, xticklabels, yticklabels = calc_contact.main(u,lipids,frame0)
 
+            # store matrix list in a list for later use
+            list_contacts_mat.append(contacts_mat)
+
             if row == nRows-1:
-                xAxisLabel = "PolyA atoms"# (" + atom_str + ")"
+                xAxisLabel = "RNA Beads"
+                # xAxisLabel = "Chol Beads"
                 show_xticklabels = True
 
             else:
@@ -305,7 +326,10 @@ for row in range(nRows):
                 show_xticklabels = False
 
             if col == 0:
-                yAxisLabel = "PolyA atoms" #"MC3 head group atoms"
+                # yAxisLabel = "RNA Beads"
+                yAxisLabel = "MC3 Beads"
+                # yAxisLabel = "Lipid5 Beads"
+                # yAxisLabel = "Chol Beads"
                 show_yticklabels = True
             else:
                 yAxisLabel = ""
@@ -315,9 +339,6 @@ for row in range(nRows):
             fig.update_xaxis(xAxisLabel,show_xticklabels,fig_par.get('x_axisType'),row=row+1,col=col+1)
             fig.update_yaxis(yAxisLabel,show_yticklabels,fig_par.get('y_axisType'),row=row+1,col=col+1)
 
-            fig.plotHeatMap(xticklabels,yticklabels,contacts_mat,row=row+1,col=col+1)
-
-            contact_type = 'polya_polya_mc3_0chol_34polya_10nt'
 
 
 """
@@ -327,11 +348,30 @@ if analysis not in ['scc','enrich','sld','contact']:
     outputDir = f'../output/{fig_par.get("saveName")}/{fig_par.get("saveName")}_{fname}'
     fig.fig.write_image(outputDir+'.png',scale=5)
 
+
+
 if analysis == 'contact':
-    outputDir = f'../output/{fig_par.get("saveName")}/{fig_par.get("saveName")}_{contact_type}.png'
-    fig.fig.write_image(outputDir,scale=5)
+
+    # Calculate the average and standard deviation
+    Z_av = np.array(np.mean(np.array(list_contacts_mat), axis=0) / normFactor )
+    Z_std = np.array(np.std(np.array(list_contacts_mat), axis=0) / normFactor )
+
+    # fig.plotHeatMap(xticklabels,yticklabels,Z_av,Z_std,row=row+1,col=col+1)
+
+    # contact_type = 'chol_rna_mc3h_43chol_34polya_10nt'
+    # outputDir = f'../output/{fig_par.get("saveName")}/{fig_par.get("saveName")}_{contact_type}.png'
+    # fig.fig.write_image(outputDir,scale=5)
+
+    print('\nav:')
+    print(*np.round(Z_av,5))
+    print('\nstd:')
+    print(*np.round(Z_std,5))
+
+
+
 
 if analysis == 'enrich':
+
     fig.plotEnrich(list_enrich,fname,lipids,row=row+1,col=col+1,showlegend=True)
 
     outputDir = f'../output/enrich/{fig_par.get("saveName")}_{fname}'
